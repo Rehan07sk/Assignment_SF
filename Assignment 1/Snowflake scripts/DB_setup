@@ -1,15 +1,18 @@
+--- DB and role creation --------
 create database snowpipe_ingest_demo;
-create role snowpipe_ingest_demo_sysadmin;
-grant role snowpipe_ingest_demo_sysadmin to role sysadmin;
 
+create role snowpipe_ingest_demo_sysadmin; -- admin role for DB
+grant role snowpipe_ingest_demo_sysadmin to role sysadmin;
 grant ownership on database snowpipe_ingest_demo to role snowpipe_ingest_demo_sysadmin;
 
+---- schema & role creation -----------
 use role snowpipe_ingest_demo_sysadmin;
 create schema s3_ingest;
 
 CREATE ROLE S3_INGEST_READONLY;
 CREATE ROLE S3_INGEST_READWRITE;
 
+---- readonly and write role privilges ---------
 GRANT USAGE ON DATABASE SNOWPIPE_INGEST_DEMO TO ROLE S3_INGEST_READONLY;
 GRANT USAGE ON SCHEMA SNOWPIPE_INGEST_DEMO.S3_INGEST TO ROLE S3_INGEST_READONLY;
 GRANT SELECT ON FUTURE TABLES IN SCHEMA SNOWPIPE_INGEST_DEMO.S3_INGEST TO ROLE S3_INGEST_READONLY;
