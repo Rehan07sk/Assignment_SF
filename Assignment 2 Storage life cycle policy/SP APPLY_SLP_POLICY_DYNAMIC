@@ -4,7 +4,6 @@ LANGUAGE JAVASCRIPT
 EXECUTE AS CALLER
 AS
 $$
-  // 1. Fetch retention policies from the metadata table
   var policies_sql = `
     SELECT CUSTOMER_NAME, RETENTION_DAYS, POLICY_NAME
     FROM CUSTOMER_RETENTION_METADATA_PROD.PUBLIC.RETENTION_POLICY_CONFIG
@@ -16,7 +15,6 @@ $$
   var log_messages = ["Starting Dynamic Storage Lifecycle Policy Application..."];
   var count_policies_applied = 0;
 
-  // 2. Iterate through each customer policy
   while (policies_rs.next()) {
     var customer_name = policies_rs.getColumnValue('CUSTOMER_NAME');
     var retention_days = policies_rs.getColumnValue('RETENTION_DAYS');
@@ -30,7 +28,6 @@ $$
     log_messages.push(`--- Applying policy for ${customer_name}: Retention ${retention_days} days ---`);
 
     try {
-      // A. Dynamic SQL to CREATE THE STORAGE LIFECYCLE POLICY
       var create_policy_sql = `
           CREATE OR REPLACE STORAGE LIFECYCLE POLICY ${policy_name}
               AS (event_ts TIMESTAMP)
@@ -43,8 +40,6 @@ $$
       snowflake.createStatement({ sqlText: create_policy_sql }).execute();
       log_messages.push(`   1. Policy CREATED/REPLACED: ${policy_name}`);
 
-      // B. Dynamic SQL to APPLY THE POLICY to the customer's transaction table
-      // Uses the correct 'ON (<column>)' syntax
       var apply_policy_sql = `
           ALTER TABLE ${full_table_name}
           ADD STORAGE LIFECYCLE POLICY ${policy_name}
