@@ -25,7 +25,7 @@ $$
     var schema_name = customer_name;
     var full_table_name = `CUSTOMER_TRANSACTIONS_PROD_DB.${schema_name}.TRANSACTIONS`;
     var policy_name = `SLP_${customer_name}_${policy_suffix}`;
-    var archive_for_days = 3650; // Long archival period
+    var archive_for_days = 365; // Long archival period
 
     log_messages.push(`--- Applying policy for ${customer_name}: Retention ${retention_days} days ---`);
 
