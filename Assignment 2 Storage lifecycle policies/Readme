@@ -1,8 +1,0 @@
-Creates a metadata database (METADATA_DB) with a table CUSTOMER_RETENTION_METADATA that stores each customer name and its RETENTION_DAYS value (WALMART=1, AMAZON=2, TARGET=3).
-
-Creates a separate database (CUSTOMER_TRANSACTIONS_DB) with three schemas (WALMART_SCHEMA, AMAZON_SCHEMA, TARGET_SCHEMA), each having a TRANSACTION table with sample rows and a CREATED_DATE column.​
-
-How the procedure works
-The stored procedure PPLY_STORAGE_LIFECYCLE_POLICY selects all rows from CUSTOMER_RETENTION_METADATA.
-
-For each row, it dynamically builds and runs an ALTER TABLE statement like ALTER TABLE CUSTOMER_TRANSACTIONS_DB.WALMART_SCHEMA.TRANSACTION SET DATA_RETENTION_TIME_IN_DAYS = 1, so each customer’s table gets its own retention window.
