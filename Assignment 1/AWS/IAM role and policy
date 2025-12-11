@@ -1,0 +1,23 @@
+-- created IAM role ROLE_SNOWFLAKE_S3 and attached below policy
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowListBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::snowpipe-parquet-dev"
+    },
+    {
+      "Sid": "AllowGetObject",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": "arn:aws:s3:::snowpipe-parquet-dev/*"
+    }
+  ]
+}
