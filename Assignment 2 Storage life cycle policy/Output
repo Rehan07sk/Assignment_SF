@@ -1,0 +1,30 @@
+CALL PUBLIC.APPLY_SLP_POLICY_DYNAMIC_PROD();
+
+--Success: Dynamic SLP creation and application complete. Total Policies Applied: 3. Details: 
+Starting Dynamic Storage Lifecycle Policy Application...
+--- Applying policy for AMAZON: Retention 1 days ---
+   1. Policy CREATED/REPLACED: SLP_AMAZON_RETENTION_1D
+   2. Policy APPLIED to: CUSTOMER_TRANSACTIONS_PROD_DB.AMAZON.TRANSACTIONS
+--- Applying policy for FLIPKART: Retention 2 days ---
+   1. Policy CREATED/REPLACED: SLP_FLIPKART_RETENTION_2D
+   2. Policy APPLIED to: CUSTOMER_TRANSACTIONS_PROD_DB.FLIPKART.TRANSACTIONS
+--- Applying policy for GOOGLE: Retention 3 days ---
+   1. Policy CREATED/REPLACED: SLP_GOOGLE_RETENTION_3D
+   2. Policy APPLIED to: CUSTOMER_TRANSACTIONS_PROD_DB.GOOGLE.TRANSACTIONS
+
+------------------------------------------------------------------------------------------
+
+   SELECT GET_DDL('TABLE', 'AMAZON.TRANSACTIONS');
+create or replace TABLE TRANSACTIONS (
+	TRANSACTION_ID NUMBER(38,0),
+	CREATED_AT TIMESTAMP_NTZ(9) DEFAULT CURRENT_TIMESTAMP(),
+	TRANSACTION_DETAILS VARCHAR(100)
+) WITH STORAGE LIFECYCLE POLICY CUSTOMER_TRANSACTIONS_PROD_DB.PUBLIC.SLP_AMAZON_RETENTION_1D ON (CREATED_AT)
+;
+
+------------------------------------------------------------------------------------------
+
+
+SHOW STORAGE LIFECYCLE POLICIES;
+
+desc STORAGE LIFECYCLE policy SLP_GOOGLE_RETENTION_3D;
