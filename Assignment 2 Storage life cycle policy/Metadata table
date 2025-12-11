@@ -1,0 +1,18 @@
+-- Metadata Configuration
+USE DATABASE CUSTOMER_RETENTION_METADATA_PROD;
+CREATE OR REPLACE TABLE PUBLIC.RETENTION_POLICY_CONFIG (
+    CUSTOMER_NAME VARCHAR(100) NOT NULL,
+    RETENTION_DAYS INT NOT NULL,         -- Data older than this will be archived (1, 2, 3 days)
+    POLICY_NAME VARCHAR(100) NOT NULL,
+    DESCRIPTION VARCHAR(255)
+);
+
+-- Insert policies for Amazon, Flipkart, and Google with short retention days
+INSERT INTO PUBLIC.RETENTION_POLICY_CONFIG (CUSTOMER_NAME, RETENTION_DAYS, POLICY_NAME, DESCRIPTION)
+VALUES
+('AMAZON', 1, 'RETENTION_1D', 'Policy to archive data older than 1 day to cool tier for Amazon.'),
+('FLIPKART', 2, 'RETENTION_2D', 'Policy to archive data older than 2 days to cool tier for Flipkart.'),
+('GOOGLE', 3, 'RETENTION_3D', 'Policy to archive data older than 3 days to cool tier for Google.');
+
+SELECT * FROM PUBLIC.RETENTION_POLICY_CONFIG;
+
