@@ -10,3 +10,12 @@ CREATE OR REPLACE PIPE PIPE_PARQUET_AUTO
 )
 
 SHOW PIPES LIKE 'PIPE_PARQUET_AUTO';
+
+
+SHOW PIPES LIKE 'PIPE_PARQUET_AUTO';
+
+--From the output, copy the value in NOTIFICATION_CHANNEL (it will be an Amazon SQS ARN, for example arn:aws:sqs:region:account:queue-name). This is what S3 must send events to.
+
+arn:aws:sqs:us-east-1:013001369188:sf-snowpipe-AIDAQGBXREZSNQAVTZ7NX-zcTeXA9-68Gk4Wff1ugaRQ
+
+SELECT SYSTEM$PIPE_STATUS('PIPE_PARQUET_AUTO');
