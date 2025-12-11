@@ -6,3 +6,25 @@ CREATE OR REPLACE STORAGE INTEGRATION INT_S3_PARQUET
   STORAGE_ALLOWED_LOCATIONS = ('s3://snowpipe-parquet-dev/PARQUET/');
 
   grant usage on integration INT_S3_PARQUET to role S3_INGEST_READWRITE;
+
+
+-- updated trust policy in IAM role
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::013001369188:user/k8lc1000-s"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "sts:ExternalId": "PEB66623_SFCRole=6_ygmP/XFJ4aw+VoUaCt1z20tacuA="
+        }
+      }
+    }
+  ]
+}
