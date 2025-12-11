@@ -1,0 +1,22 @@
+onfigure S3 event notification
+In AWS console → S3 → your bucket (e.g. rehan-snowpipe-parquet-dev):​
+
+Go to Properties tab.
+
+Scroll to Event notifications → click Create event notification.
+
+Fill fields:
+
+Name: snowpipe-parquet-auto (any name).
+
+Event types: select All object create events (or at least PUT).
+
+Prefix: raw/parquet/ (your folder path Snowpipe listens to).
+
+Suffix: .parquet.
+
+Destination:
+
+Choose SQS queue.
+
+Paste the NOTIFICATION_CHANNEL ARN from Snowflake.
