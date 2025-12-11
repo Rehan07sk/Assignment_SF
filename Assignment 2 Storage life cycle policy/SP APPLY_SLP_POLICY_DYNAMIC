@@ -1,0 +1,67 @@
+CREATE OR REPLACE PROCEDURE APPLY_SLP_POLICY_DYNAMIC_PROD()
+RETURNS VARCHAR
+LANGUAGE JAVASCRIPT
+EXECUTE AS CALLER
+AS
+$$
+  // 1. Fetch retention policies from the metadata table
+  var policies_sql = `
+    SELECT CUSTOMER_NAME, RETENTION_DAYS, POLICY_NAME
+    FROM CUSTOMER_RETENTION_METADATA_PROD.PUBLIC.RETENTION_POLICY_CONFIG
+    ORDER BY CUSTOMER_NAME
+  `;
+  var policies_stmt = snowflake.createStatement({ sqlText: policies_sql });
+  var policies_rs = policies_stmt.execute();
+
+  var log_messages = ["Starting Dynamic Storage Lifecycle Policy Application..."];
+  var count_policies_applied = 0;
+
+  // 2. Iterate through each customer policy
+  while (policies_rs.next()) {
+    var customer_name = policies_rs.getColumnValue('CUSTOMER_NAME');
+    var retention_days = policies_rs.getColumnValue('RETENTION_DAYS');
+    var policy_suffix = policies_rs.getColumnValue('POLICY_NAME');
+
+    var schema_name = customer_name;
+    var full_table_name = `CUSTOMER_TRANSACTIONS_PROD_DB.${schema_name}.TRANSACTIONS`;
+    var policy_name = `SLP_${customer_name}_${policy_suffix}`;
+    var archive_for_days = 3650; // Long archival period
+
+    log_messages.push(`--- Applying policy for ${customer_name}: Retention ${retention_days} days ---`);
+
+    try {
+      // A. Dynamic SQL to CREATE THE STORAGE LIFECYCLE POLICY
+      var create_policy_sql = `
+          CREATE OR REPLACE STORAGE LIFECYCLE POLICY ${policy_name}
+              AS (event_ts TIMESTAMP)
+              RETURNS BOOLEAN ->
+                  event_ts < DATEADD(DAY, -${retention_days}, CURRENT_TIMESTAMP())
+              ARCHIVE_TIER = COOL
+              ARCHIVE_FOR_DAYS = ${archive_for_days}
+              COMMENT = 'Dynamic SLP for ${customer_name}, Archiving data older than ${retention_days} days to COOL tier.';
+      `;
+      snowflake.createStatement({ sqlText: create_policy_sql }).execute();
+      log_messages.push(`   1. Policy CREATED/REPLACED: ${policy_name}`);
+
+      // B. Dynamic SQL to APPLY THE POLICY to the customer's transaction table
+      // Uses the correct 'ON (<column>)' syntax
+      var apply_policy_sql = `
+          ALTER TABLE ${full_table_name}
+          ADD STORAGE LIFECYCLE POLICY ${policy_name}
+          ON (CREATED_AT);
+      `;
+      snowflake.createStatement({ sqlText: apply_policy_sql }).execute();
+      log_messages.push(`   2. Policy APPLIED to: ${full_table_name}`);
+
+      count_policies_applied++;
+
+    } catch (err) {
+      log_messages.push(`!!! Error applying policy for ${customer_name}: SQL compilation error: ${err.message}`);
+    }
+  }
+
+  return `Success: Dynamic SLP creation and application complete. Total Policies Applied: ${count_policies_applied}. Details: \n` + log_messages.join('\n');
+$$;
+
+
+CALL PUBLIC.APPLY_SLP_POLICY_DYNAMIC_PROD();
