@@ -1,0 +1,1 @@
+implemented a dynamic Storage Lifecycle Policy (SLP) in Snowflake, which reads customer-specific retention days from a metadata table and applies unique, automatically-created archiving rules to each customer's transaction table, moving old data to the COOL tier for 365 days.
