@@ -1,0 +1,12 @@
+-- 1. Create file format for Parquet
+CREATE OR REPLACE FILE FORMAT FF_PARQUET
+  TYPE = PARQUET;
+
+-- 2. Create external stage on S3
+CREATE OR REPLACE STAGE STG_S3_PARQUET
+  URL = 's3://snowpipe-parquet-dev/PARQUET/'
+  STORAGE_INTEGRATION = INT_S3_PARQUET
+  FILE_FORMAT = FF_PARQUET;
+
+-- 3. Verify connectivity
+LIST @STG_S3_PARQUET;
