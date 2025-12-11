@@ -1,0 +1,31 @@
+CREATE OR REPLACE PROCEDURE METADATA_DB.METADATA_SCHEMA.APPLY_STORAGE_LIFECYCLE_POLICY()
+RETURNS STRING
+LANGUAGE JAVASCRIPT
+EXECUTE AS CALLER
+AS
+'
+try {
+    // Get metadata information
+    var meta_query = "SELECT CUSTOMER_NAME, RETENTION_DAYS FROM METADATA_DB.METADATA_SCHEMA.CUSTOMER_RETENTION_METADATA";
+    var meta_stmt = snowflake.createStatement({sqlText: meta_query});
+    var meta_results = meta_stmt.execute();
+    
+    while (meta_results.next()) {
+        var customer = meta_results.getColumnValue(1);
+        var retention_days = meta_results.getColumnValue(2);
+        
+        // Apply Snowflake storage lifecycle policy
+        var alter_query = "ALTER TABLE CUSTOMER_TRANSACTIONS_DB." + customer + "_SCHEMA.TRANSACTION SET DATA_RETENTION_TIME_IN_DAYS = " + retention_days;
+        
+        var policy_stmt = snowflake.createStatement({sqlText: alter_query});
+        policy_stmt.execute();
+    }
+    
+    return "Successfully applied storage lifecycle policies";
+} 
+catch (err) {
+    return "Error: " + err;
+}
+';
+
+call METADATA_DB.METADATA_SCHEMA.APPLY_STORAGE_LIFECYCLE_POLICY();
